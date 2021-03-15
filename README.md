@@ -14,3 +14,35 @@ Even if the complexity is a bit higher in the start it becomes less complex
 since we have a way to execute code in the new process before we execute the
 new process image typically invoced using the "Command" interface in both
 Rust and GO.
+
+
+## Create a new file system
+
+`sudo` is needed in WSL since you can't run as root.
+
+```text
+chr=/home/dev/test/container-root
+mkdir -p $chr
+mkdir -p $chr/{bin,lib,lib64,proc}
+cd $chr
+sudo cp -v /bin/{bash,touch,ls,rm, ps, mount} $chr/bin
+list="$(ldd /bin/bash | egrep -o '/lib.*\.[0-9]*')"
+echo $list # optional
+for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; done
+list="$(ldd /bin/touch | egrep -o '/lib.*\.[0-9]*')"
+for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; done
+list="$(ldd /bin/ls | egrep -o '/lib.*\.[0-9]*')"
+for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; done
+list="$(ldd /bin/ls | egrep -o '/lib.*\.[0-9]*')"
+for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; done
+list="$(ldd /bin/ps | egrep -o '/lib.*\.[0-9]*')"
+for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; done
+list="$(ldd /bin/mount | egrep -o '/lib.*\.[0-9]*')"
+for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; done
+```
+
+
+## Running in WSL
+
+Since WSL doesn't allow you to run as root, you need to do `cargo build`, and
+then `sudo ./target/debug/containers run /bin/bash` to run the example.

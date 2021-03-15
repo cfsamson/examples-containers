@@ -56,7 +56,6 @@ impl Cmd {
             let mut args: Vec<*const c_char> = self.args.iter().map(|a| a.as_ptr()).collect();
             args.push(ptr::null());
 
-            //let cmd = CString::new(cmd).expect("Failed cstring conversion");
             let res = unsafe { libc::execvp(self.cmd.as_ptr(), args.as_ptr()) };
 
             if res == -1 {

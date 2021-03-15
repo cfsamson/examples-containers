@@ -1,6 +1,6 @@
-use std::{env::{self}, ffi::CString};
+use std::{env::{self}, ffi::CString, ptr};
 use std::io;
-use libc;
+use libc::{self, c_void};
 
 mod command;
 
@@ -31,6 +31,43 @@ fn set_hostname(hostname: &str) -> Result<(), io::Error> {
     }
 }
 
+fn set_chroot(path: &str) -> Result<(), io::Error> {
+    let c_path = CString::new(path).unwrap();
+    let res = unsafe { libc::chroot(c_path.as_ptr() )};
+
+    if res != 0 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}
+
+fn set_dir(path: &str) -> Result<(), io::Error> {
+    let c_path = CString::new(path).unwrap();
+    let res = unsafe { libc::chdir(c_path.as_ptr()) };
+    if res != 0 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}
+
+fn mount() -> Result<(), io::Error> {
+    let proc = CString::new("proc").unwrap();
+    let proc = proc.as_ptr();
+    let s_proc = CString::new("/proc").unwrap();
+    let s_proc = s_proc.as_ptr();
+    let data = CString::default();
+    let data = data.as_ptr() as *const c_void;
+
+    let res = unsafe { libc::mount(proc, proc, proc, 0, data) };
+    if res != 0 {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
+}
+
 use command::{Cmd, SysProcAttr};
 
 fn run() {
@@ -43,6 +80,10 @@ fn run() {
     let handle = cmd.run_with_proc(|| {
         print_log();
         set_hostname("container").expect("Failed setting hostname");
+        set_chroot("/home/dev/test/container-root").unwrap();
+        set_dir("/").unwrap();
+        mount().unwrap();
+
     }).unwrap();
 
     handle.wait().expect("Wait");
