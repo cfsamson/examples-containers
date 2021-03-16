@@ -25,7 +25,7 @@ chr=/home/dev/test/container-root
 mkdir -p $chr
 mkdir -p $chr/{bin,lib,lib64,proc}
 cd $chr
-sudo cp -v /bin/{bash,touch,ls,rm, ps, mount} $chr/bin
+sudo cp -v /bin/{bash,touch,ls,rm, ps, mount, sleep} $chr/bin
 list="$(ldd /bin/bash | egrep -o '/lib.*\.[0-9]*')"
 echo $list # optional
 for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; done
@@ -38,6 +38,8 @@ for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; do
 list="$(ldd /bin/ps | egrep -o '/lib.*\.[0-9]*')"
 for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; done
 list="$(ldd /bin/mount | egrep -o '/lib.*\.[0-9]*')"
+for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; done
+list="$(ldd /bin/sleep | egrep -o '/lib.*\.[0-9]*')"
 for i in $list; do sudo cp -v --parents "$i" "/home/dev/test/container-root"; done
 ```
 
